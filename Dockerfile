@@ -28,7 +28,17 @@ ENV UV_TORCH_BACKEND=cpu
 # del repositorio de investigación y solo existe en la máquina del equipo.
 # Aquí `resumidor` se instala desde git, que es la dependencia publicable.
 COPY pyproject.toml README.md ./
-RUN uv pip install --system --no-cache --no-sources --torch-backend=cpu .
+
+# `git` es necesario para resolver la dependencia `resumidor`, que se declara
+# por URL de git. La imagen base `slim` no lo trae. Se instala, se usa y se
+# elimina en la MISMA capa: si se borrara en una capa posterior, los ~50 MB
+# seguirían dentro de la imagen final.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git \
+ && uv pip install --system --no-cache --no-sources --torch-backend=cpu . \
+ && apt-get purge -y git \
+ && apt-get autoremove -y \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY app/ app/
 
