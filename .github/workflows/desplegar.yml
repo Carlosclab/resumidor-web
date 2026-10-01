@@ -20,6 +20,12 @@ concurrency:
 jobs:
   verificar:
     runs-on: ubuntu-latest
+    # A nivel de job, no de paso: `uv run` vuelve a resolver y también
+    # consultaría [tool.uv.sources], que apunta a la carpeta hermana del
+    # repositorio de investigación y solo existe en la máquina del equipo.
+    env:
+      UV_NO_SOURCES: "1"
+      UV_TORCH_BACKEND: cpu
     steps:
       - uses: actions/checkout@v4
 
@@ -29,17 +35,11 @@ jobs:
           # Misma versión que el Dockerfile: comportamiento predecible.
           version: "0.12.9"
 
-      # `--no-sources` ignora [tool.uv.sources], que apunta a la carpeta
-      # hermana del repositorio de investigación y solo existe en local.
-      # Aquí el paquete se instala desde git, como en el contenedor.
-      # `--torch-backend=cpu` evita bajar 2,5 GB de bibliotecas CUDA que
-      # ni CI ni Cloud Run pueden usar.
+      # El paquete se instala desde git, como en el contenedor.
+      # UV_TORCH_BACKEND evita bajar 2,5 GB de bibliotecas CUDA que ni CI
+      # ni Cloud Run pueden usar.
       - name: Montar el entorno
-        # UV_TORCH_BACKEND como variable y no como flag: `--torch-backend`
-        # solo existe en `uv pip install`, no en `uv sync`.
-        env:
-          UV_TORCH_BACKEND: cpu
-        run: uv sync --no-sources
+        run: uv sync
 
       - run: uv run ruff check .
       - run: uv run ruff format --check .
