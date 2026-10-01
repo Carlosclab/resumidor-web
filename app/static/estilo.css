@@ -1,34 +1,81 @@
-/* Resumidor científico — hoja de estilo
+/* Resumidor científico — identidad visual Universidad de Antioquia
  *
- * Patrón iLovePDF: una acción por pantalla, zona de entrada grande y central,
- * un único botón primario. Nada compite por la atención con la tarea.
+ * Los tokens vienen del sistema de diseño `Universidad de Antioquia`, derivado
+ * a su vez de la identidad publicada en udea.edu.co: el verde del logosímbolo,
+ * la paleta del portal, Roboto Condensed para titulares y Roboto para texto.
  *
- * Esta capa es deliberadamente independiente del marcado y de la lógica:
- * cuando llegue el diseño del equipo, se sustituye este archivo y poco más.
+ * Dos cosas se adaptan a propósito, y conviene saber por qué:
+ *
+ * 1. La ESCALA TIPOGRÁFICA del sistema está calculada para láminas de
+ *    1280×720 proyectadas (display de 76 px). Copiarla a una página web daría
+ *    titulares absurdos. Se conservan las familias, los pesos y las
+ *    proporciones; los tamaños se recalculan para lectura en pantalla.
+ *
+ * 2. La ESTRUCTURA sigue el patrón iLovePDF —una acción por pantalla, zona de
+ *    entrada grande y central— que es lo que pidió el equipo. La identidad
+ *    viste esa estructura; no la sustituye.
+ *
+ * El gesto de marca que sí se respeta literalmente: la regla lima bajo el
+ * titular, una sola vez por pantalla.
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Condensed:wght@400;700&display=swap');
+
 :root {
-  --tinta: #14181f;
-  --tinta-2: #5a6472;
-  --borde: #e3e7ed;
-  --fondo: #f6f8fb;
-  --superficie: #ffffff;
-  --acento: #2f6bff;
-  --acento-oscuro: #1d50d4;
-  --exito: #1e8e3e;
-  --error: #c5221f;
-  --radio: 14px;
-  --sombra: 0 1px 2px rgba(20, 24, 31, .05), 0 8px 24px rgba(20, 24, 31, .06);
+  /* --- Color de marca (tokens del sistema UdeA) --------------------------- */
+  --udea-verde: #0d6939;
+  --udea-verde-claro: #1a8a4d;
+  --udea-verde-oscuro: #084c29;
+  --udea-esmeralda: #069a7e;
+  --udea-teal: #006065;
+  --udea-lima: #8bc34a;
+  --udea-lima-oscuro: #6c9a06;
+  --udea-ambar: #ffc107;
+
+  /* --- Neutros ------------------------------------------------------------ */
+  --tinta: rgba(0, 0, 0, .87);
+  --tinta-suave: rgba(0, 0, 0, .54);
+  --tinta-tenue: rgba(0, 0, 0, .32);
+  --papel: #ffffff;
+  --papel-alt: #fafafa;
+  --borde: #e0e0e0;
+  --carbon: #1b1b1b;
+
+  /* --- Superficie activa -------------------------------------------------- */
+  --fondo: var(--papel-alt);
+  --superficie: var(--papel);
+  --texto: var(--tinta);
+  --texto-suave: var(--tinta-suave);
+  --acento: var(--udea-lima-oscuro);
+  --linea: var(--borde);
+  --error: #8e2340;
+
+  /* --- Tipografía --------------------------------------------------------- */
+  --fuente-titulo: 'Roboto Condensed', 'Arial Narrow', Arial, sans-serif;
+  --fuente-texto: 'Roboto', Helvetica, Arial, sans-serif;
+  --versalita: .14em;
+
+  /* --- Geometría ---------------------------------------------------------- */
+  /* El sistema usa esquinas rectas (--udea-radio: 0) y 4 px para lo blando. */
+  --radio: 0px;
+  --radio-suave: 4px;
+  --regla-grosor: 6px;
+  --regla-ancho: 104px;
+  --sombra: 0 2px 16px rgba(0, 0, 0, .14);
 }
 
+/* Equivale al tema `oscuro` del sistema de láminas. Sin anidación CSS:
+   no está soportada en todos los navegadores y aquí no aporta nada. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --tinta: #e9edf4;
-    --tinta-2: #9aa5b5;
-    --borde: #2a3139;
-    --fondo: #12151a;
-    --superficie: #1a1e25;
-    --sombra: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  :root:not([data-tema="claro"]) {
+    --fondo: #121212;
+    --superficie: var(--carbon);
+    --texto: #ffffff;
+    --texto-suave: rgba(255, 255, 255, .7);
+    --acento: var(--udea-lima);
+    --linea: rgba(255, 255, 255, .2);
+    --borde: rgba(255, 255, 255, .2);
+    --error: #ef9a9a;
   }
 }
 
@@ -37,76 +84,110 @@
 body {
   margin: 0;
   background: var(--fondo);
-  color: var(--tinta);
-  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--texto);
+  font-family: var(--fuente-texto);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* --- barra superior --- */
+/* --- barra superior --------------------------------------------------------
+   El verde del logosímbolo. En el portal de la UdeA la banda superior es
+   sólida; aquí cumple la misma función de anclar la identidad. */
 .barra {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 24px;
-  background: var(--superficie);
-  border-bottom: 1px solid var(--borde);
+  background: var(--udea-verde);
+  color: #fff;
 }
 
-.marca { display: flex; align-items: center; gap: 10px; font-size: 15px; }
-.marca strong { font-weight: 700; }
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
 
 .logo {
   width: 30px; height: 30px;
   display: grid; place-items: center;
-  background: var(--acento);
-  color: #fff;
-  border-radius: 9px;
+  background: var(--udea-lima);
+  color: #17300a;
+  font-family: var(--fuente-titulo);
   font-weight: 700;
+  border-radius: var(--radio-suave);
 }
 
-.barra-nota { font-size: 12.5px; color: var(--tinta-2); }
+.barra-nota {
+  font-size: 12px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .76);
+}
 
 /* --- estructura --- */
 main {
   flex: 1;
   width: 100%;
-  max-width: 760px;
+  max-width: 820px;
   margin: 0 auto;
   padding: 48px 16px 64px;
 }
 
 .paso { text-align: center; }
 
-h1 {
-  font-size: clamp(27px, 5vw, 38px);
-  line-height: 1.15;
-  letter-spacing: -.02em;
-  margin: 0 0 10px;
+/* Titulares en Roboto Condensed, como manda el sistema. */
+h1, h2 {
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.06;
+  margin: 0;
+  color: var(--texto);
 }
 
-h2 { font-size: 24px; margin: 0 0 8px; letter-spacing: -.01em; }
+h1 { font-size: clamp(30px, 5.5vw, 44px); }
+h2 { font-size: clamp(24px, 4vw, 32px); }
+
+/* EL GESTO DE MARCA: la regla lima bajo el titular. Una sola por pantalla. */
+.regla {
+  display: block;
+  width: var(--regla-ancho);
+  height: var(--regla-grosor);
+  margin: 16px auto 0;
+  background: var(--acento);
+}
 
 .subtitulo {
-  color: var(--tinta-2);
-  margin: 0 auto 28px;
-  max-width: 48ch;
+  color: var(--texto-suave);
+  margin: 20px auto 28px;
+  max-width: 50ch;
+  font-size: 17px;
 }
 
 /* --- zona de entrada: el foco de la pantalla --- */
 .zona {
   background: var(--superficie);
-  border: 2px dashed var(--borde);
+  border: 1px solid var(--linea);
+  border-top: var(--regla-grosor) solid var(--acento);
   border-radius: var(--radio);
   box-shadow: var(--sombra);
-  transition: border-color .15s;
   overflow: hidden;
   text-align: left;
+  transition: border-color .15s;
 }
 
-.zona:focus-within { border-color: var(--acento); border-style: solid; }
+.zona:focus-within { border-color: var(--udea-esmeralda); }
 
 textarea {
   width: 100%;
@@ -116,9 +197,9 @@ textarea {
   border: 0;
   background: transparent;
   color: inherit;
-  font: inherit;
+  font-family: var(--fuente-texto);
   font-size: 15px;
-  line-height: 1.65;
+  line-height: 1.6;
 }
 
 textarea:focus { outline: none; }
@@ -128,66 +209,71 @@ textarea:focus { outline: none; }
   justify-content: space-between;
   align-items: center;
   padding: 10px 16px;
-  border-top: 1px solid var(--borde);
+  border-top: 1px solid var(--linea);
   font-size: 13px;
-  color: var(--tinta-2);
+  color: var(--texto-suave);
 }
 
 .enlace {
   background: none; border: 0; padding: 0;
-  color: var(--acento); font: inherit; font-size: 13px;
+  color: var(--udea-esmeralda);
+  font: inherit; font-size: 13px;
   cursor: pointer; text-decoration: underline;
 }
 
-/* --- botones --- */
+/* --- botones --------------------------------------------------------------
+   Verde del logosímbolo para la acción principal; el ámbar del sistema queda
+   reservado a advertencias, como indica la guía de identidad. */
 .principal, .secundaria {
-  font: inherit;
-  font-weight: 600;
-  padding: 14px 30px;
-  border-radius: 10px;
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 15px 34px;
+  border-radius: var(--radio-suave);
   cursor: pointer;
   transition: background .15s, transform .05s;
 }
 
 .principal {
-  margin-top: 24px;
+  margin-top: 26px;
   border: 0;
-  background: var(--acento);
+  background: var(--udea-verde);
   color: #fff;
-  font-size: 16.5px;
 }
 
-.principal:hover:not(:disabled) { background: var(--acento-oscuro); }
+.principal:hover:not(:disabled) { background: var(--udea-verde-claro); }
 .principal:active:not(:disabled) { transform: translateY(1px); }
-.principal:disabled { opacity: .45; cursor: not-allowed; }
+.principal:disabled { opacity: .4; cursor: not-allowed; }
 
 .secundaria {
-  margin-top: 24px;
-  border: 1px solid var(--borde);
-  background: var(--superficie);
-  color: var(--tinta);
+  margin-top: 26px;
+  border: 1.5px solid var(--linea);
+  background: transparent;
+  color: var(--texto);
 }
 
-.secundaria:hover { border-color: var(--tinta-2); }
+.secundaria:hover { border-color: var(--udea-verde); color: var(--udea-verde); }
 
-/* --- avisos --- */
+/* --- avisos: el patrón `nota` del sistema, con regla lateral --- */
 .aviso {
-  margin: 16px auto 0;
-  max-width: 54ch;
-  padding: 11px 14px;
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--error) 9%, transparent);
-  color: var(--error);
-  font-size: 14px;
+  margin: 18px auto 0;
+  max-width: 56ch;
+  padding: 12px 18px;
+  border-left: var(--regla-grosor) solid var(--udea-ambar);
+  background: rgba(0, 0, 0, .04);
+  color: var(--texto);
+  font-size: 14.5px;
   text-align: left;
 }
 
 /* --- proceso --- */
 .girando {
   width: 44px; height: 44px;
-  margin: 24px auto 20px;
-  border: 3px solid var(--borde);
-  border-top-color: var(--acento);
+  margin: 26px auto 20px;
+  border: 3px solid var(--linea);
+  border-top-color: var(--udea-lima);
   border-radius: 50%;
   animation: giro .8s linear infinite;
 }
@@ -195,11 +281,10 @@ textarea:focus { outline: none; }
 @keyframes giro { to { transform: rotate(360deg); } }
 
 .progreso {
-  height: 5px;
+  height: var(--regla-grosor);
   max-width: 340px;
-  margin: 8px auto 0;
-  background: var(--borde);
-  border-radius: 99px;
+  margin: 18px auto 0;
+  background: var(--linea);
   overflow: hidden;
 }
 
@@ -207,7 +292,6 @@ textarea:focus { outline: none; }
   height: 100%;
   width: 0;
   background: var(--acento);
-  border-radius: 99px;
   transition: width .4s ease;
 }
 
@@ -219,24 +303,24 @@ textarea:focus { outline: none; }
 /* --- resultado --- */
 .marca-exito {
   width: 48px; height: 48px;
-  margin: 0 auto 14px;
+  margin: 0 auto 16px;
   display: grid; place-items: center;
-  background: color-mix(in srgb, var(--exito) 14%, transparent);
-  color: var(--exito);
+  background: var(--udea-lima);
+  color: #17300a;
   border-radius: 50%;
   font-size: 24px;
 }
 
 .resultado {
-  margin-top: 20px;
-  padding: 26px;
+  margin-top: 22px;
+  padding: 28px;
   background: var(--superficie);
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
+  border: 1px solid var(--linea);
+  border-top: var(--regla-grosor) solid var(--udea-esmeralda);
   box-shadow: var(--sombra);
   text-align: left;
-  font-size: 16px;
-  line-height: 1.75;
+  font-size: 16.5px;
+  line-height: 1.7;
   white-space: pre-wrap;
 }
 
@@ -247,47 +331,73 @@ textarea:focus { outline: none; }
   flex-wrap: wrap;
 }
 
-/* --- métricas --- */
+/* --- métricas: el patrón `tarjeta de métrica`, con regla superior --- */
 .metricas {
-  margin-top: 34px;
+  margin-top: 36px;
   text-align: left;
-  border-top: 1px solid var(--borde);
+  border-top: 1px solid var(--linea);
   padding-top: 18px;
 }
 
 .metricas summary {
   cursor: pointer;
-  font-size: 14px;
-  color: var(--tinta-2);
-  font-weight: 600;
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: var(--versalita);
+  text-transform: uppercase;
+  color: var(--texto-suave);
 }
 
 .metricas dl {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 7px 18px;
-  margin: 16px 0 0;
+  gap: 8px 20px;
+  margin: 18px 0 0;
   font-size: 14px;
 }
 
-.metricas dt { color: var(--tinta-2); }
+.metricas dt {
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
 .metricas dd { margin: 0; font-variant-numeric: tabular-nums; }
 
 /* --- pie --- */
 footer {
-  border-top: 1px solid var(--borde);
+  border-top: 1px solid var(--linea);
   background: var(--superficie);
   padding: 22px 16px;
   text-align: center;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 footer p { margin: 0 0 4px; }
 
-.pie { color: var(--tinta-2); font-size: 12.5px; margin-top: 10px; }
+footer strong {
+  font-family: var(--fuente-titulo);
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.pie { color: var(--texto-suave); font-size: 12.5px; margin-top: 10px; }
+
+/* La barra categórica del sistema, que cierra portada y cierre de lámina. */
+.banda {
+  display: flex;
+  height: 8px;
+}
+.banda > span { flex: 1 1 0; }
 
 @media (max-width: 520px) {
   main { padding-top: 32px; }
   textarea { min-height: 200px; }
   .principal, .secundaria { width: 100%; }
+  .barra-nota { display: none; }
 }

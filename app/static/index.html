@@ -11,7 +11,7 @@
 <header class="barra">
   <div class="marca">
     <span class="logo">R</span>
-    <span>Resumidor <strong>científico</strong></span>
+    <span>Resumidor científico</span>
   </div>
   <div class="barra-nota" id="barra-config">Cargando modelo…</div>
 </header>
@@ -20,6 +20,7 @@
   <!-- PASO 1 — entrada -->
   <section class="paso" id="paso-entrada">
     <h1>Resume un artículo científico</h1>
+    <span class="regla"></span>
     <p class="subtitulo">
       Pega el texto del artículo y obtén un resumen generado por un modelo de
       lenguaje. Gratis y sin registro.
@@ -43,6 +44,7 @@
   <section class="paso" id="paso-proceso" hidden>
     <div class="girando"></div>
     <h2 id="proceso-titulo">Resumiendo el artículo…</h2>
+    <span class="regla"></span>
     <p class="subtitulo" id="proceso-detalle">Seleccionando las frases centrales</p>
     <div class="progreso"><div class="progreso-barra" id="barra"></div></div>
   </section>
@@ -51,6 +53,7 @@
   <section class="paso" id="paso-resultado" hidden>
     <div class="marca-exito">✓</div>
     <h2>Resumen listo</h2>
+    <span class="regla"></span>
 
     <article class="resultado" id="resultado"></article>
 
@@ -70,10 +73,17 @@
   </section>
 </main>
 
+<div class="banda" aria-hidden="true">
+  <span style="background:#0d6939"></span><span style="background:#069a7e"></span>
+  <span style="background:#8bc34a"></span><span style="background:#006065"></span>
+  <span style="background:#a0662b"></span><span style="background:#8e2340"></span>
+  <span style="background:#2f4858"></span><span style="background:#ffc107"></span>
+</div>
+
 <footer>
   <p>
-    <strong>Grupo 2 · Los Predictores</strong> — Proyecto Integrador I,
-    Universidad de Antioquia
+    <strong>Grupo 2 · Los Predictores</strong><br>
+    Proyecto Integrador I — Universidad de Antioquia
   </p>
   <p class="pie">
     La configuración desplegada es la que ganó el criterio de compromiso
