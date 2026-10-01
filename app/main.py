@@ -6,6 +6,7 @@ propio del equipo, y Gradio impone su estética. Aquí el HTML es nuestro.
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -19,7 +20,10 @@ from pydantic import BaseModel, Field
 from app.servicio import (
     MAX_CARACTERES,
     MIN_CARACTERES,
+    PRESET_POR_DEFECTO,
+    PRESETS,
     EntradaInvalida,
+    analizar,
     obtener_resumidor,
 )
 
@@ -35,17 +39,12 @@ async def ciclo_de_vida(app: FastAPI):
 
     Cloud Run envía peticiones en cuanto el contenedor responde al sondeo de
     arranque. Si el modelo se cargara perezosamente, el primer usuario
-    pagaría la descarga de 1,5 GB más la compilación del grafo.
+    pagaría la descarga más la compilación del grafo.
     """
     resumidor = obtener_resumidor()
-    log.info("Cargando %s …", resumidor.config.model.checkpoint)
+    log.info("Cargando el preset por defecto (%s) …", PRESET_POR_DEFECTO)
     resumidor.precargar()
-    log.info(
-        "Listo · modelo=%s estrategia=%s dispositivo=%s",
-        resumidor.config.model.checkpoint,
-        resumidor.config.strategy.kind,
-        resumidor.config.model.device,
-    )
+    log.info("Listo para atender peticiones")
     yield
 
 
@@ -56,28 +55,41 @@ app = FastAPI(
 )
 
 
-class PeticionResumen(BaseModel):
+class PeticionTexto(BaseModel):
     texto: str = Field(min_length=1, max_length=MAX_CARACTERES * 2)
+
+
+class PeticionResumen(PeticionTexto):
+    preset: str | None = None
 
 
 @app.get("/salud")
 def salud() -> dict:
     """Sondeo para Cloud Run. Distingue «arrancando» de «listo»."""
-    r = obtener_resumidor()
-    return {"listo": r.listo, "modelo": r.config.model.checkpoint}
+    return {"listo": obtener_resumidor().listo}
 
 
 @app.get("/api/configuracion")
 def configuracion() -> dict:
-    """Qué está sirviendo la plataforma, y los límites de entrada."""
-    r = obtener_resumidor()
+    """Las opciones predefinidas y sus perfiles de costo.
+
+    Las cifras son del experimento (300 artículos por celda) y la interfaz
+    las presenta como tal: sirven para calibrar la espera, no como promesa.
+    """
     return {
-        "configuracion": r.config.id,
-        "modelo": r.config.model.checkpoint,
-        "estrategia": r.config.strategy.kind,
+        "presets": [dataclasses.asdict(p) for p in PRESETS],
+        "por_defecto": PRESET_POR_DEFECTO,
         "min_caracteres": MIN_CARACTERES,
         "max_caracteres": MAX_CARACTERES,
     }
+
+
+@app.post("/api/analizar")
+def analizar_texto(peticion: PeticionTexto) -> dict:
+    try:
+        return analizar(peticion.texto)
+    except EntradaInvalida as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @app.post("/api/resumir")
@@ -89,7 +101,7 @@ def resumir(peticion: PeticionResumen) -> dict:
             detail="El modelo todavía se está cargando. Inténtalo en unos segundos.",
         )
     try:
-        resumen = r.resumir(peticion.texto)
+        resumen = r.resumir(peticion.texto, peticion.preset)
     except EntradaInvalida as e:
         raise HTTPException(status_code=422, detail=str(e)) from e
     except Exception:
@@ -99,24 +111,14 @@ def resumir(peticion: PeticionResumen) -> dict:
         ) from None
 
     log.info(
-        "resumen · %d→%d tokens · %.1fs · %d invocación(es)",
+        "%s · %d→%d tokens · %.1fs · %d invocación(es)",
+        resumen.preset,
         resumen.tokens_entrada,
         resumen.tokens_salida,
         resumen.latencia_s,
         resumen.invocaciones,
     )
-    return {
-        "resumen": resumen.texto,
-        "metricas": {
-            "modelo": resumen.modelo,
-            "estrategia": resumen.estrategia,
-            "latencia_s": resumen.latencia_s,
-            "invocaciones": resumen.invocaciones,
-            "tokens_entrada": resumen.tokens_entrada,
-            "tokens_salida": resumen.tokens_salida,
-            "ratio_compresion": resumen.ratio_compresion,
-        },
-    }
+    return dataclasses.asdict(resumen)
 
 
 @app.get("/")

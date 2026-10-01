@@ -3,76 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Resumidor de artículos científicos</title>
+<title>Resumidor de artículos científicos · Universidad de Antioquia</title>
 <link rel="stylesheet" href="/estatico/estilo.css">
 </head>
 <body>
 
 <header class="barra">
   <div class="marca">
-    <span class="logo">R</span>
-    <span>Resumidor científico</span>
+    <img class="marca__logo" src="/estatico/logo-udea.png"
+         alt="Universidad de Antioquia" width="600" height="150">
+    <span class="marca__separador" aria-hidden="true"></span>
+    <span class="marca__nombre">Resumidor</span>
   </div>
-  <div class="barra-nota" id="barra-config">Cargando modelo…</div>
+  <nav class="barra__nav">
+    <button class="nav-enlace" data-abrir="como-funciona">Cómo funciona</button>
+    <button class="nav-enlace" data-abrir="investigacion">La investigación</button>
+  </nav>
 </header>
 
 <main>
-  <!-- PASO 1 — entrada -->
-  <section class="paso" id="paso-entrada">
-    <h1>Resume un artículo científico</h1>
-    <span class="regla"></span>
-    <p class="subtitulo">
-      Pega el texto del artículo y obtén un resumen generado por un modelo de
-      lenguaje. Gratis y sin registro.
-    </p>
 
-    <div class="zona" id="zona">
-      <textarea id="texto" spellcheck="false"
-        placeholder="Pega aquí el texto del artículo, en inglés…"></textarea>
-      <div class="zona-pie">
+  <!-- ─────────────── PASO 1 · entrada ─────────────── -->
+  <section class="pantalla" id="pantalla-entrada">
+    <div class="lienzo">
+      <h1>Resumir artículo científico</h1>
+      <p class="entradilla">
+        Obtén el resumen de un artículo en inglés y cuánto costó producirlo,
+        con la configuración que ganó el experimento.
+      </p>
+
+      <label class="campo">
+        <span class="campo__rotulo">Texto del artículo</span>
+        <textarea id="texto" spellcheck="false" rows="10"
+          placeholder="Pega aquí el cuerpo del artículo, en inglés. Sin la bibliografía."></textarea>
+      </label>
+
+      <div class="campo__pie">
         <span id="contador">0 caracteres</span>
         <button class="enlace" id="ejemplo" type="button">Usar un ejemplo</button>
       </div>
+
+      <p class="aviso" id="aviso" hidden></p>
+
+      <button class="principal principal--grande" id="continuar" disabled>
+        Continuar
+      </button>
     </div>
-
-    <p class="aviso" id="aviso" hidden></p>
-
-    <button class="principal" id="resumir" disabled>Resumir artículo</button>
   </section>
 
-  <!-- PASO 2 — procesando -->
-  <section class="paso" id="paso-proceso" hidden>
-    <div class="girando"></div>
-    <h2 id="proceso-titulo">Resumiendo el artículo…</h2>
-    <span class="regla"></span>
-    <p class="subtitulo" id="proceso-detalle">Seleccionando las frases centrales</p>
-    <div class="progreso"><div class="progreso-barra" id="barra"></div></div>
-  </section>
+  <!-- ─────────────── PASO 2 · opciones ─────────────── -->
+  <section class="pantalla" id="pantalla-opciones" hidden>
+    <div class="dos-columnas">
 
-  <!-- PASO 3 — resultado -->
-  <section class="paso" id="paso-resultado" hidden>
-    <div class="marca-exito">✓</div>
-    <h2>Resumen listo</h2>
-    <span class="regla"></span>
+      <div class="panel-documento">
+        <div class="documento">
+          <div class="documento__hoja" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span>
+          </div>
+          <p class="documento__nombre">Texto pegado</p>
+          <p class="documento__meta" id="documento-meta"></p>
+        </div>
+      </div>
 
-    <article class="resultado" id="resultado"></article>
+      <aside class="panel-opciones">
+        <h2>Resumir</h2>
 
-    <div class="acciones">
-      <button class="principal" id="copiar">Copiar resumen</button>
-      <button class="secundaria" id="otro">Resumir otro artículo</button>
+        <div class="recomendada" id="recomendada"></div>
+
+        <details class="avanzadas">
+          <summary>Opciones avanzadas</summary>
+          <fieldset class="grupo">
+            <legend>Configuración</legend>
+            <div id="presets"></div>
+          </fieldset>
+        </details>
+
+        <button class="principal" id="resumir">Resumir &rarr;</button>
+        <button class="enlace enlace--bloque" id="volver">&larr; Cambiar el texto</button>
+      </aside>
+
     </div>
-
-    <details class="metricas">
-      <summary>Detalles de la ejecución</summary>
-      <dl id="metricas"></dl>
-      <p class="pie">
-        Estas cifras son las que el sistema midió en esta ejecución, con la
-        misma instrumentación del experimento.
-      </p>
-    </details>
   </section>
+
+  <!-- ─────────────── PASO 3 · proceso ─────────────── -->
+  <section class="pantalla" id="pantalla-proceso" hidden>
+    <div class="lienzo lienzo--centrado">
+      <h2>Resumiendo tu artículo…</h2>
+
+      <div class="progreso"><div class="progreso__barra" id="barra"></div></div>
+      <p class="progreso__paso" id="paso">Paso 1 de 4 · Preparando el texto</p>
+
+      <p class="cronometro" id="cronometro">0,0 s</p>
+      <p class="progreso__nota" id="referencia"></p>
+    </div>
+  </section>
+
+  <!-- ─────────────── PASO 4 · resultado ─────────────── -->
+  <section class="pantalla" id="pantalla-resultado" hidden>
+    <div class="lienzo lienzo--centrado">
+      <h2>Tu resumen está listo</h2>
+
+      <div class="acciones">
+        <button class="principal" id="copiar">Copiar resumen</button>
+        <button class="secundaria" id="descargar">Descargar .txt</button>
+      </div>
+
+      <!-- Las métricas van arriba y grandes a propósito: medir el costo es
+           la aportación del proyecto, no un detalle técnico. -->
+      <dl class="metricas" id="metricas"></dl>
+
+      <article class="resultado" id="resultado"></article>
+
+      <button class="enlace enlace--bloque" id="otro">&larr; Resumir otro artículo</button>
+    </div>
+  </section>
+
 </main>
 
+<!-- Paleta categórica del sistema de diseño de la Universidad de Antioquia. -->
 <div class="banda" aria-hidden="true">
   <span style="background:#0d6939"></span><span style="background:#069a7e"></span>
   <span style="background:#8bc34a"></span><span style="background:#006065"></span>
@@ -81,15 +130,53 @@
 </div>
 
 <footer>
-  <p>
-    <strong>Grupo 2 · Los Predictores</strong><br>
-    Proyecto Integrador I — Universidad de Antioquia
-  </p>
+  <p><strong>Grupo 2 · Los Predictores</strong></p>
+  <p>Proyecto Integrador I — Universidad de Antioquia</p>
   <p class="pie">
-    La configuración desplegada es la que ganó el criterio de compromiso
+    La configuración por defecto es la que ganó el criterio de compromiso
     calidad/costo sobre 300 artículos. Solo procesa texto en inglés.
   </p>
 </footer>
+
+<!-- ─────────────── diálogos ─────────────── -->
+<dialog id="como-funciona">
+  <h3>Cómo funciona</h3>
+  <ol>
+    <li><strong>Selección.</strong> Un algoritmo de centralidad elige las frases
+      más representativas hasta llenar la ventana de contexto del modelo.</li>
+    <li><strong>Generación.</strong> Un modelo preentrenado escribe el resumen
+      a partir de esa selección.</li>
+    <li><strong>Medición.</strong> Se registra el tiempo, la memoria y las
+      invocaciones al modelo que costó producirlo.</li>
+  </ol>
+  <p class="pie">
+    El artículo medio de arXiv ocupa 8.542 tokens y los modelos de contexto
+    corto aceptan 1.024. Esa brecha es el problema que el proyecto estudia.
+  </p>
+  <button class="secundaria" data-cerrar>Cerrar</button>
+</dialog>
+
+<dialog id="investigacion">
+  <h3>La investigación</h3>
+  <p>
+    Se compararon tres estrategias de manejo de contexto largo sobre dos
+    modelos preentrenados, en 300 artículos por configuración.
+  </p>
+  <p>
+    El resultado principal es contraintuitivo: <strong>map-reduce no compra
+    calidad</strong>. Cuesta unas diez invocaciones al modelo frente a una, y
+    la diferencia no es estadísticamente significativa.
+  </p>
+  <p>
+    Por eso la plataforma sirve por defecto la configuración de mejor
+    compromiso, y no la de mejor calidad bruta.
+  </p>
+  <p class="pie">
+    Código y resultados:
+    <a href="https://github.com/carlosforeroudea/ps1-g2">carlosforeroudea/ps1-g2</a>
+  </p>
+  <button class="secundaria" data-cerrar>Cerrar</button>
+</dialog>
 
 <script src="/estatico/app.js"></script>
 </body>
