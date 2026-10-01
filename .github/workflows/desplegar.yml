@@ -26,6 +26,8 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          # Misma versión que el Dockerfile: comportamiento predecible.
+          version: "0.12.9"
 
       # `--no-sources` ignora [tool.uv.sources], que apunta a la carpeta
       # hermana del repositorio de investigación y solo existe en local.
@@ -33,7 +35,11 @@ jobs:
       # `--torch-backend=cpu` evita bajar 2,5 GB de bibliotecas CUDA que
       # ni CI ni Cloud Run pueden usar.
       - name: Montar el entorno
-        run: uv sync --no-sources --torch-backend=cpu
+        # UV_TORCH_BACKEND como variable y no como flag: `--torch-backend`
+        # solo existe en `uv pip install`, no en `uv sync`.
+        env:
+          UV_TORCH_BACKEND: cpu
+        run: uv sync --no-sources
 
       - run: uv run ruff check .
       - run: uv run ruff format --check .
