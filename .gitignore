@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+.DS_Store
+
+# Credenciales: nunca en el repositorio.
+.env
+.env.*
+*.pem

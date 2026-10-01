@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resumidor de artículos científicos</title>
+<link rel="stylesheet" href="/estatico/estilo.css">
+</head>
+<body>
+
+<header class="barra">
+  <div class="marca">
+    <span class="logo">R</span>
+    <span>Resumidor <strong>científico</strong></span>
+  </div>
+  <div class="barra-nota" id="barra-config">Cargando modelo…</div>
+</header>
+
+<main>
+  <!-- PASO 1 — entrada -->
+  <section class="paso" id="paso-entrada">
+    <h1>Resume un artículo científico</h1>
+    <p class="subtitulo">
+      Pega el texto del artículo y obtén un resumen generado por un modelo de
+      lenguaje. Gratis y sin registro.
+    </p>
+
+    <div class="zona" id="zona">
+      <textarea id="texto" spellcheck="false"
+        placeholder="Pega aquí el texto del artículo, en inglés…"></textarea>
+      <div class="zona-pie">
+        <span id="contador">0 caracteres</span>
+        <button class="enlace" id="ejemplo" type="button">Usar un ejemplo</button>
+      </div>
+    </div>
+
+    <p class="aviso" id="aviso" hidden></p>
+
+    <button class="principal" id="resumir" disabled>Resumir artículo</button>
+  </section>
+
+  <!-- PASO 2 — procesando -->
+  <section class="paso" id="paso-proceso" hidden>
+    <div class="girando"></div>
+    <h2 id="proceso-titulo">Resumiendo el artículo…</h2>
+    <p class="subtitulo" id="proceso-detalle">Seleccionando las frases centrales</p>
+    <div class="progreso"><div class="progreso-barra" id="barra"></div></div>
+  </section>
+
+  <!-- PASO 3 — resultado -->
+  <section class="paso" id="paso-resultado" hidden>
+    <div class="marca-exito">✓</div>
+    <h2>Resumen listo</h2>
+
+    <article class="resultado" id="resultado"></article>
+
+    <div class="acciones">
+      <button class="principal" id="copiar">Copiar resumen</button>
+      <button class="secundaria" id="otro">Resumir otro artículo</button>
+    </div>
+
+    <details class="metricas">
+      <summary>Detalles de la ejecución</summary>
+      <dl id="metricas"></dl>
+      <p class="pie">
+        Estas cifras son las que el sistema midió en esta ejecución, con la
+        misma instrumentación del experimento.
+      </p>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <p>
+    <strong>Grupo 2 · Los Predictores</strong> — Proyecto Integrador I,
+    Universidad de Antioquia
+  </p>
+  <p class="pie">
+    La configuración desplegada es la que ganó el criterio de compromiso
+    calidad/costo sobre 300 artículos. Solo procesa texto en inglés.
+  </p>
+</footer>
+
+<script src="/estatico/app.js"></script>
+</body>
+</html>

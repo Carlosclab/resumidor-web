@@ -1,0 +1,293 @@
+/* Resumidor científico — hoja de estilo
+ *
+ * Patrón iLovePDF: una acción por pantalla, zona de entrada grande y central,
+ * un único botón primario. Nada compite por la atención con la tarea.
+ *
+ * Esta capa es deliberadamente independiente del marcado y de la lógica:
+ * cuando llegue el diseño del equipo, se sustituye este archivo y poco más.
+ */
+
+:root {
+  --tinta: #14181f;
+  --tinta-2: #5a6472;
+  --borde: #e3e7ed;
+  --fondo: #f6f8fb;
+  --superficie: #ffffff;
+  --acento: #2f6bff;
+  --acento-oscuro: #1d50d4;
+  --exito: #1e8e3e;
+  --error: #c5221f;
+  --radio: 14px;
+  --sombra: 0 1px 2px rgba(20, 24, 31, .05), 0 8px 24px rgba(20, 24, 31, .06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tinta: #e9edf4;
+    --tinta-2: #9aa5b5;
+    --borde: #2a3139;
+    --fondo: #12151a;
+    --superficie: #1a1e25;
+    --sombra: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* --- barra superior --- */
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.marca { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+.marca strong { font-weight: 700; }
+
+.logo {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  background: var(--acento);
+  color: #fff;
+  border-radius: 9px;
+  font-weight: 700;
+}
+
+.barra-nota { font-size: 12.5px; color: var(--tinta-2); }
+
+/* --- estructura --- */
+main {
+  flex: 1;
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 16px 64px;
+}
+
+.paso { text-align: center; }
+
+h1 {
+  font-size: clamp(27px, 5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin: 0 0 10px;
+}
+
+h2 { font-size: 24px; margin: 0 0 8px; letter-spacing: -.01em; }
+
+.subtitulo {
+  color: var(--tinta-2);
+  margin: 0 auto 28px;
+  max-width: 48ch;
+}
+
+/* --- zona de entrada: el foco de la pantalla --- */
+.zona {
+  background: var(--superficie);
+  border: 2px dashed var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  transition: border-color .15s;
+  overflow: hidden;
+  text-align: left;
+}
+
+.zona:focus-within { border-color: var(--acento); border-style: solid; }
+
+textarea {
+  width: 100%;
+  min-height: 260px;
+  resize: vertical;
+  padding: 20px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+textarea:focus { outline: none; }
+
+.zona-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-top: 1px solid var(--borde);
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+
+.enlace {
+  background: none; border: 0; padding: 0;
+  color: var(--acento); font: inherit; font-size: 13px;
+  cursor: pointer; text-decoration: underline;
+}
+
+/* --- botones --- */
+.principal, .secundaria {
+  font: inherit;
+  font-weight: 600;
+  padding: 14px 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, transform .05s;
+}
+
+.principal {
+  margin-top: 24px;
+  border: 0;
+  background: var(--acento);
+  color: #fff;
+  font-size: 16.5px;
+}
+
+.principal:hover:not(:disabled) { background: var(--acento-oscuro); }
+.principal:active:not(:disabled) { transform: translateY(1px); }
+.principal:disabled { opacity: .45; cursor: not-allowed; }
+
+.secundaria {
+  margin-top: 24px;
+  border: 1px solid var(--borde);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+.secundaria:hover { border-color: var(--tinta-2); }
+
+/* --- avisos --- */
+.aviso {
+  margin: 16px auto 0;
+  max-width: 54ch;
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--error) 9%, transparent);
+  color: var(--error);
+  font-size: 14px;
+  text-align: left;
+}
+
+/* --- proceso --- */
+.girando {
+  width: 44px; height: 44px;
+  margin: 24px auto 20px;
+  border: 3px solid var(--borde);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: giro .8s linear infinite;
+}
+
+@keyframes giro { to { transform: rotate(360deg); } }
+
+.progreso {
+  height: 5px;
+  max-width: 340px;
+  margin: 8px auto 0;
+  background: var(--borde);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progreso-barra {
+  height: 100%;
+  width: 0;
+  background: var(--acento);
+  border-radius: 99px;
+  transition: width .4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .girando { animation: none; }
+  .progreso-barra { transition: none; }
+}
+
+/* --- resultado --- */
+.marca-exito {
+  width: 48px; height: 48px;
+  margin: 0 auto 14px;
+  display: grid; place-items: center;
+  background: color-mix(in srgb, var(--exito) 14%, transparent);
+  color: var(--exito);
+  border-radius: 50%;
+  font-size: 24px;
+}
+
+.resultado {
+  margin-top: 20px;
+  padding: 26px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+  text-align: left;
+  font-size: 16px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.acciones {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* --- métricas --- */
+.metricas {
+  margin-top: 34px;
+  text-align: left;
+  border-top: 1px solid var(--borde);
+  padding-top: 18px;
+}
+
+.metricas summary {
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--tinta-2);
+  font-weight: 600;
+}
+
+.metricas dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 7px 18px;
+  margin: 16px 0 0;
+  font-size: 14px;
+}
+
+.metricas dt { color: var(--tinta-2); }
+.metricas dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+/* --- pie --- */
+footer {
+  border-top: 1px solid var(--borde);
+  background: var(--superficie);
+  padding: 22px 16px;
+  text-align: center;
+  font-size: 13.5px;
+}
+
+footer p { margin: 0 0 4px; }
+
+.pie { color: var(--tinta-2); font-size: 12.5px; margin-top: 10px; }
+
+@media (max-width: 520px) {
+  main { padding-top: 32px; }
+  textarea { min-height: 200px; }
+  .principal, .secundaria { width: 100%; }
+}

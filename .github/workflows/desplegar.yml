@@ -1,0 +1,90 @@
+name: Desplegar en Cloud Run
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PROYECTO: udea-509713
+  REGION: us-central1
+  SERVICIO: resumidor-web
+  IMAGEN: us-central1-docker.pkg.dev/udea-509713/resumidor/web
+  CUENTA_BUILD: 395466321539-compute@developer.gserviceaccount.com
+
+# Un despliegue a la vez: dos construcciones concurrentes se pisan.
+concurrency:
+  group: desplegar
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # `--no-sources` ignora [tool.uv.sources], que apunta a la carpeta
+      # hermana del repositorio de investigación y solo existe en local.
+      # Aquí el paquete se instala desde git, como en el contenedor.
+      # `--torch-backend=cpu` evita bajar 2,5 GB de bibliotecas CUDA que
+      # ni CI ni Cloud Run pueden usar.
+      - name: Montar el entorno
+        run: uv sync --no-sources --torch-backend=cpu
+
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+      # Los tests marcados `modelo` descargan 1,5 GB de pesos: fuera de CI.
+      - run: uv run pytest -m "not modelo"
+
+  desplegar:
+    needs: verificar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      # Los flags de cuenta de servicio y bucket no son opcionales: en los
+      # proyectos nuevos de GCP ya no se crea la cuenta de Cloud Build, y sin
+      # ellos el build falla con PERMISSION_DENIED aun siendo propietario.
+      - name: Construir la imagen
+        run: |
+          gcloud builds submit \
+            --tag "${IMAGEN}:${GITHUB_SHA}" \
+            --region="${REGION}" \
+            --timeout=40m \
+            --service-account="projects/${PROYECTO}/serviceAccounts/${CUENTA_BUILD}" \
+            --default-buckets-behavior=regional-user-owned-bucket \
+            .
+
+      # concurrency=1 porque hay un solo modelo en memoria: dos peticiones
+      # simultáneas competirían por CPU y duplicarían la latencia de ambas.
+      # min-instances=0 deja el reposo a coste cero.
+      - name: Desplegar
+        run: |
+          gcloud run deploy "${SERVICIO}" \
+            --image="${IMAGEN}:${GITHUB_SHA}" \
+            --region="${REGION}" \
+            --allow-unauthenticated \
+            --port=8080 \
+            --cpu=8 \
+            --memory=8Gi \
+            --min-instances=0 \
+            --max-instances=2 \
+            --concurrency=1 \
+            --timeout=300 \
+            --cpu-boost
+
+      - name: URL del servicio
+        run: |
+          echo "Desplegado en: $(gcloud run services describe "${SERVICIO}" \
+            --region="${REGION}" --format='value(status.url)')" >> "$GITHUB_STEP_SUMMARY"
