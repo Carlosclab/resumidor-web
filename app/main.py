@@ -9,6 +9,7 @@ from __future__ import annotations
 import dataclasses
 import logging
 import os
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -35,16 +36,29 @@ ESTATICOS = Path(__file__).parent / "static"
 
 @asynccontextmanager
 async def ciclo_de_vida(app: FastAPI):
-    """Carga el modelo ANTES de aceptar tráfico.
+    """Abre el puerto de inmediato y carga el modelo en segundo plano.
 
-    Cloud Run envía peticiones en cuanto el contenedor responde al sondeo de
-    arranque. Si el modelo se cargara perezosamente, el primer usuario
-    pagaría la descarga más la compilación del grafo.
+    Cargar antes de escuchar parece lo correcto, pero rompe el arranque en
+    Cloud Run: su sondeo de arranque intenta conectar al puerto 8080 y expira
+    con DEADLINE_EXCEEDED mientras el calentamiento genera texto en CPU. La
+    instancia nunca llega a levantarse.
+
+    Así que el puerto se abre ya y la carga va en un hilo. `/salud` informa
+    con `listo` si el modelo está disponible, y `/api/resumir` responde 503
+    mientras tanto: la interfaz espera y lo muestra, en vez de que la
+    instancia entera muera.
     """
     resumidor = obtener_resumidor()
-    log.info("Cargando el preset por defecto (%s) …", PRESET_POR_DEFECTO)
-    resumidor.precargar()
-    log.info("Listo para atender peticiones")
+
+    def cargar() -> None:
+        log.info("Cargando el preset por defecto (%s) …", PRESET_POR_DEFECTO)
+        try:
+            resumidor.precargar()
+            log.info("Listo para atender peticiones")
+        except Exception:
+            log.exception("Fallo al precargar el modelo")
+
+    threading.Thread(target=cargar, name="precarga", daemon=True).start()
     yield
 
 

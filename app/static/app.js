@@ -135,12 +135,31 @@ function detenerProceso() {
   etapas = [];
 }
 
+/* El servicio abre el puerto antes de terminar de cargar el modelo, porque
+ * cargarlo primero hacía expirar el sondeo de arranque de Cloud Run. Si llega
+ * un 503 es que aún está cargando: se espera y se reintenta en vez de fallar. */
+async function esperarAlModelo(maxSegundos = 180) {
+  const limite = Date.now() + maxSegundos * 1000;
+  while (Date.now() < limite) {
+    try {
+      const { listo } = await (await fetch("/salud")).json();
+      if (listo) return true;
+    } catch { /* el contenedor aún no responde */ }
+    $("paso").textContent = "Preparando el modelo por primera vez…";
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  return false;
+}
+
 async function resumir() {
   const p = estado.presets.find((x) => x.id === estado.elegido);
   mostrar("proceso");
   arrancarProceso(p);
 
   try {
+    if (!(await esperarAlModelo())) {
+      throw new Error("El servicio no terminó de arrancar. Inténtalo de nuevo.");
+    }
     const r = await fetch("/api/resumir", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
